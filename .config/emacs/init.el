@@ -289,6 +289,8 @@
 (setq *efmt-format-alist*
       `(("el" ,#'jlib/indent-lisp)
 	("ml" ("ocamlformat" "--enable-outside-detected-project" "<TARGET>"))
+	("html" ("prettier" "-w" "<TARGET>"))
+	("css" ("prettier" "-w" "<TARGET>"))
 	("js" ("prettier" "-w" "<TARGET>"))
 	("md" ("prettier" "-w" "<TARGET>"))
 	("go" ("gofmt" "-w" "<TARGET>"))))
