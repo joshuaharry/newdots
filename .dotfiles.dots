@@ -2,3 +2,6 @@
 ~/LICENSE.md
 ~/bin
 ~/.dotfiles.dots
+~/.config/emacs/early-init.el
+~/.config/emacs/init.el
+~/.config/emacs/snippets
