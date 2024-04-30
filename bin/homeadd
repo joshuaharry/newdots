@@ -1,21 +1,8 @@
 #!/usr/bin/env python3
-# A very simple Python script to read ~/.dotfiles.dots and add them to
-# staging.
 import os
 from pathlib import Path
 
-
-def home_add(line: str):
-    """
-    Parse the given string as a line in our dotfiles and stage it when
-    necessary.
-    """
-    if line.startswith('#') or line == "":
-        return
-    os.system(f"home add {line}")
-
-
 for line in Path.home().joinpath('.dotfiles.dots').read_text().splitlines():
-    print(line)
-    home_add(line)
-    
+    if line.startswith('#') or line == "":
+        continue
+    os.system(f"home add {line}")
