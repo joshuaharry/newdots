@@ -1,0 +1,4 @@
+#!/bin/sh
+homeadd
+home commit
+home push origin main
