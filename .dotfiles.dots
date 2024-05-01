@@ -6,3 +6,5 @@
 ~/.config/emacs/init.el
 ~/.config/emacs/snippets
 ~/.zshrc
+~/.config/nvim/init.lua
+~/.config/nvim/snippets
