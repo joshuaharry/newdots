@@ -293,6 +293,8 @@
 ;;; LANGUAGE MODES
 ;; Markdown support.
 (use-package markdown-mode :ensure t :demand t)
+;; Clojure support.
+(use-package cider :ensure t :demand t)
 ;; OCaml support.
 (use-package tuareg :ensure t :demand t)
 (use-package dune :ensure t :demand t)
@@ -311,6 +313,8 @@
 
 (setq *efmt-format-alist*
       `(("el" ,#'jlib/indent-lisp)
+	("clj" ("cljfmt" "fix" "<TARGET>"))
+	("edn" ("cljfmt" "fix" "<TARGET>"))
 	("ml" ("ocamlformat" "--enable-outside-detected-project" "<TARGET>"))
 	("html" ("prettier" "-w" "<TARGET>"))
 	("css" ("prettier" "-w" "<TARGET>"))

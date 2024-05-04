@@ -8,3 +8,4 @@
 ~/.zshrc
 ~/.config/nvim/init.lua
 ~/.config/nvim/snippets
+~/.aliases.sh
