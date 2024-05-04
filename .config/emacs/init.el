@@ -179,15 +179,36 @@
 (global-set-key (kbd "C-c d p") #'jlib/goto-current-project)
 (global-set-key (kbd "C-c d s") #'jlib/set-current-project)
 
+(defmacro jlib/def-dired (fname keybinding path)
+  "Generate a function FNAME bound to KEYBINDING which takes you to PATH."
+  `(progn
+     (fset ,fname (lambda () (interactive) (dired ,path)))
+     (global-set-key (kbd ,keybinding) ,fname)))
+
+(jlib/def-dired
+ 'jlib/goto-github
+ "C-c d g"
+ (jlib/path-join (getenv "HOME") "code" "github"))
+
+(jlib/def-dired
+ 'jlib/goto-emacs
+ "C-c d e"
+ (jlib/path-join (getenv "HOME") ".config" "emacs"))
+
+(jlib/def-dired
+ 'jlib/goto-ml
+ "C-c d m"
+ (jlib/path-join (getenv "HOME") "code" "github" "materiumlabs"))
+
 ;; Bootstrap elpaca, our package manager.
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
+			      :ref nil :depth 1
+			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+			      :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -203,10 +224,10 @@
                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
                                                  ,(plist-get order :repo) ,repo))))
                  ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
+				       (or (plist-get order :ref) "--"))))
                  (emacs (concat invocation-directory invocation-name))
                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
                  ((require 'elpaca))
                  ((elpaca-generate-autoloads "elpaca" repo)))
             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
