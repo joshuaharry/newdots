@@ -327,7 +327,7 @@
 
 ;; Enable snippets everywhere.
 (yas-global-mode)
-
+;; Enable formatting everywhere.
 (global-set-key (kbd "C-c p") #'efmt)
 ;; Enable the modeline.
 (telephone-line-mode 1)
@@ -339,6 +339,8 @@
 (load-theme 'doom-one-light t)
 ;; Load the $PATH from the shell.
 (exec-path-from-shell-initialize)
+;; Enable direnv.
+(direnv-mode)
 
 ;; Terminals in Emacs
 (defvar *jlib/term-fn* #'vterm
@@ -382,14 +384,6 @@
 (global-set-key (kbd "C-c t k") #'jlib/summon-terminal-above)
 (global-set-key (kbd "C-c t l") #'jlib/summon-terminal-right)
 
-;; Now that init has finished, we have to reset GC and the `file-name-handler-alist'
-;; to something sane.
-(setq
- file-name-handler-alist '(("\\`/[^/]*\\'" . tramp-completion-file-name-handler)
-			   ("\\`/[^/|:][^/|]*:" . tramp-file-name-handler)
-			   ("\\`/:" . file-name-non-special))
- gc-cons-threshold (* 1024 1024 100))
-
 ;; Global Programming settings
 (defun jlib/prog-mode-hook ()
   "My global settings for programming."
@@ -427,3 +421,11 @@
    web-mode-code-indent-offset 2))
 
 (add-hook 'tuareg-mode-hook #'jlib/tuareg-mode-hook)
+
+;; Now that init has finished, we have to reset GC and the `file-name-handler-alist'
+;; to something sane.
+(setq
+ file-name-handler-alist '(("\\`/[^/]*\\'" . tramp-completion-file-name-handler)
+			   ("\\`/[^/|:][^/|]*:" . tramp-file-name-handler)
+			   ("\\`/:" . file-name-non-special))
+ gc-cons-threshold (* 1024 1024 100))
