@@ -287,8 +287,8 @@
 (use-package flycheck :ensure t :demand t)
 ;; Use Yasnippet for snippets.
 (use-package yasnippet :ensure t :demand t)
-;; Use Web mode for HTML/CSS/JavaScript
-(use-package web-mode :ensure t :demand t)
+;; Use direnv for direnv support.
+(use-package direnv :ensure t :demand t)
 
 ;;; LANGUAGE MODES
 ;; Markdown support.
@@ -297,6 +297,8 @@
 (use-package tuareg :ensure t :demand t)
 (use-package dune :ensure t :demand t)
 (use-package merlin :ensure t :demand t)
+;; Use Web mode for HTML/CSS/JavaScript
+(use-package web-mode :ensure t :demand t)
 
 (elpaca-wait)
 
