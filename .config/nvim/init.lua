@@ -1,7 +1,6 @@
 -- Configure tabs/spaces/line numbers
 vim.opt.number = true
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
+vim.opt.tabstop = 2 vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 vim.opt.hlsearch = false
@@ -86,7 +85,7 @@ require("lazy").setup({
 	},
 	-- Manage auto pairs
 	{
-		"jiangmiao/auto-pairs",
+    "cohama/lexima.vim"
 	},
 	-- Manage HTML completions
 	"alvan/vim-closetag",
