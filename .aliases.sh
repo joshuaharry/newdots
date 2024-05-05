@@ -2,6 +2,7 @@
 alias aliases='nvim ~/.aliases.sh'
 alias c='clear'
 alias e='exit'
+alias ggh='cd ~/code/github'
 alias gp='cd "$(cat ~/.current_project)"'
 alias kittyrc='nvim ~/.config/kitty/kitty.conf'
 alias l='eza -l'

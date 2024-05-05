@@ -18,6 +18,9 @@
  backup-directory-alist `(("." . ,(jlib/path-join (getenv "HOME") ".config" "emacs" "backups")))
  mac-command-modifier 'meta)
 
+;; Make sure that typing `:' in C++ mode doesn't backward indent.
+(add-hook 'c++-mode-hook (lambda () (define-key c++-mode-map ":" nil)))	  
+
 ;; If you don't call `show-paren-mode' again after changing `show-paren-delay' to 0,
 ;; configuring show-paren-delay above does absolutely nothing.
 (show-paren-mode)
