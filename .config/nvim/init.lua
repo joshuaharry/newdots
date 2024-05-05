@@ -70,6 +70,19 @@ require("lazy").setup({
 						},
 					})
 				end,
+        ["volar"] = function()
+          require("lspconfig").volar.setup({
+            filetypes = { "vue" },
+            init_options = {
+              vue = {
+                hybridMode = false,
+              },
+              typescript = {
+                tsdk = vim.fn.getcwd() .. "/node_modules/typescript/lib",
+              },
+            },
+          })
+        end,
 				["tailwindcss"] = function()
 					require("lspconfig").tailwindcss.setup({
 						filetypes = { "heex", "eruby", "typescriptreact", "html", "astro" },
