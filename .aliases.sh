@@ -1,6 +1,7 @@
 #!/bin/sh
 alias aliases='nvim ~/.aliases.sh'
 alias c='clear'
+alias dots='nvim ~/.dotfiles.dots'
 alias e='exit'
 alias ggh='cd ~/code/github'
 alias gp='cd "$(cat ~/.current_project)"'
