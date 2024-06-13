@@ -1,3 +1,4 @@
+~/.agkozak-zsh-prompt/agkozak-zsh-prompt.plugin.zsh
 ~/.aliases.sh
 ~/.config/emacs/early-init.el
 ~/.config/emacs/init.el
@@ -6,10 +7,9 @@
 ~/.config/nvim/init.lua
 ~/.config/nvim/snippets
 ~/.dotfiles.dots
+~/.zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+~/.zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 ~/.zshrc
 ~/LICENSE.md
 ~/README.md
 ~/bin
-~/.agkozak-zsh-prompt/agkozak-zsh-prompt.plugin.zsh
-~/.zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
-~/.zsh-autosuggestions/zsh-autosuggestions.plugin.zsh

@@ -190,7 +190,14 @@ require("lazy").setup({
                 stdin = 1,
                 try_node_exe = 1
             }
+            vim.g.neoformat_typescript_prettierfmt = {
+                exe = "prettier",
+                args = {"--stdin-filepath", '"%:p"'},
+                stdin = 1,
+                try_node_exe = 1
+            }
             vim.g.neoformat_enabled_heex = {"mixfmt"}
+            vim.g.neoformat_enabled_typescript = {"prettierfmt"}
             vim.g.neoformat_enabled_python = {"ruff"}
             vim.g.neoformat_enabled_clojure = {"cljfmt"}
             vim.g.neoformat_enabled_htmldjango = {"prettierfmt"}
