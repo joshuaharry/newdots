@@ -302,6 +302,8 @@
 (use-package tuareg :ensure t :demand t)
 (use-package dune :ensure t :demand t)
 (use-package merlin :ensure t :demand t)
+;; Haskell support
+(use-package haskell-mode :ensure t :demand t)
 ;; Use Web mode for HTML/CSS/JavaScript
 (use-package web-mode :ensure t :demand t)
 
@@ -316,6 +318,7 @@
 
 (setq *efmt-format-alist*
       `(("el" ,#'jlib/indent-lisp)
+	("hs" ("ormolu" "-i" "<TARGET>"))
 	("clj" ("cljfmt" "fix" "<TARGET>"))
 	("edn" ("cljfmt" "fix" "<TARGET>"))
 	("ml" ("ocamlformat" "--enable-outside-detected-project" "<TARGET>"))

@@ -31,7 +31,7 @@ function gig() {
   curl https://www.toptal.com/developers/gitignore/api/"$1" >.gitignore
 }
 
-# Configure direnv
+# Configure mise
 eval "$(direnv hook zsh)"
 
 # Configure Zoxide
