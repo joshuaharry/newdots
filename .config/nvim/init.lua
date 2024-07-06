@@ -7,7 +7,7 @@ vim.opt.hlsearch = false
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 
--- Run a shell command
+-- Run a shell command and get the result as a string
 local function exec(cmd)
     local result = vim.fn.system(cmd)
     if vim.v.shell_error ~= 0 then
@@ -16,14 +16,12 @@ local function exec(cmd)
     return result
 end
 
--- Get the file extension of the current buffer
 local function current_buffer_file_extension()
     local buffer_name = vim.api.nvim_buf_get_name(0)
     local extension = buffer_name:match("^.+%.(.+)$")
     return extension
 end
 
--- Formatting
 local function read_file_to_string(file_path)
     local file = io.open(file_path, "r") -- Open the file in read mode
     if not file then
