@@ -2,8 +2,6 @@
 ~/.aliases.sh
 ~/.config/emacs/early-init.el
 ~/.config/emacs/init.el
-~/.config/emacs/init-backup.el
-~/.config/emacs/init-full.el
 ~/.config/emacs/snippets
 ~/.config/kitty/kitty.conf
 ~/.config/nvim/init.lua

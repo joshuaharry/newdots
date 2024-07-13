@@ -1,3 +1,7 @@
+;;; init.el --- My custom Emacs LISP configuration.  -*- lexical-binding: t -*-
+;;; package --- Summary
+;;; A simple Emacs config that doesn't use any external packages.
+
 ;; init.el
 (defun jlib/path-join (root &rest dirs)
   "Join ROOT with DIRS to construct a path string in an OS independent way."
@@ -18,15 +22,18 @@
  backup-directory-alist `(("." . ,(jlib/path-join (getenv "HOME") ".config" "emacs" "backups")))
  mac-command-modifier 'meta)
 
-;; Make sure that typing `:' in C++ mode doesn't backward indent.
-(add-hook 'c++-mode-hook (lambda () (define-key c++-mode-map ":" nil)))	  
-
 ;; If you don't call `show-paren-mode' again after changing `show-paren-delay' to 0,
 ;; configuring show-paren-delay above does absolutely nothing.
 (show-paren-mode)
 
+;; Make sure that typing `:' in C++ mode doesn't backward indent.
+(add-hook 'c++-mode-hook (lambda () (define-key c++-mode-map ":" nil)))
+
 ;; Put Emacs in fullscreen mode by default.
 (toggle-frame-fullscreen)
+
+;;; Simple, good enough modeline
+(setq-default mode-line-format '(" %b | %l:%C "))
 
 ;; Let Emacs know that we understand what `a' does in Dired.
 (put 'dired-find-alternate-file 'disabled nil)
@@ -41,6 +48,26 @@
 (global-set-key (kbd "C-M-f") #'toggle-frame-fullscreen)
 (global-set-key (kbd "C-z") #'undo)
 (global-set-key (kbd "M-q") #'save-buffers-kill-terminal)
+(global-set-key (kbd "C-M-d") #'xref-find-definitions)
+
+;; Add a key binding for toggling documentation.
+(defun jlib/find-first (predicate list)
+  "Return the first element in LIST that satisfies PREDICATE, or nil if none found."
+  (catch 'found
+    (dolist (elem list)
+      (when (funcall predicate elem)
+        (throw 'found elem)))
+    nil))
+
+(defun jlib/toggle-docs ()
+  "Toggle documentation on and off."
+  (interactive)
+  (let ((the-window (jlib/find-first (lambda (el) (string-match-p "*eldoc*" (buffer-name (window-buffer el)))) (window-list))))
+    (cond
+     (the-window (delete-window the-window))
+     (:otherwise (eldoc-doc-buffer t)))))
+
+(global-set-key (kbd "C-M-h") #'jlib/toggle-docs)
 
 ;; Change mark from CMD+SPC to CMD+J, since CMD+SPC is bound to the search bar in
 ;; OSX.
@@ -107,10 +134,15 @@
   "Prevent themes from interfering with one another."
   (mapc #'disable-theme custom-enabled-themes))
 
+;; Load my favorite default theme, Leuven
+(load-theme 'leuven t)
+
 ;; Set the default font size.
 (defvar *jlib/default-font-size* 200
   "Default font size to revert to on changes.")
-					; Set the default font family.
+
+;; Set the default font family.
+
 (defvar *jlib/default-font-name* "Hack Nerd Font Mono"
   "Default font to use with Emacs.")
 
@@ -203,239 +235,64 @@
  "C-c d m"
  (jlib/path-join (getenv "HOME") "code" "github" "materiumlabs"))
 
-;; Bootstrap elpaca, our package manager.
-(defvar elpaca-installer-version 0.7)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-			      :ref nil :depth 1
-			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-			      :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                 ,@(when-let ((depth (plist-get order :depth)))
-                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                 ,(plist-get order :repo) ,repo))))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-				       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
+;; Add a generic programming mode hook
+(defun jlib/prog-mode-hook ()
+  "My global settings for programming."
+  (display-line-numbers-mode)
+  (flymake-mode))
 
+(add-hook 'prog-mode-hook #'jlib/prog-mode-hook)
 
-;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable use-package :ensure support for Elpaca.
-  (elpaca-use-package-mode))
+;;; Custom Formatting
+(load (jlib/path-join user-emacs-directory "efmt.el"))
 
-;; DO NOT DELETE THIS LINE OF CODE! If you do, *none* of the packages we load
-;; below will actually work.
-(elpaca-wait)
-
-;;When installing a package which modifies a form used at the top-level
-;;(e.g. a package which adds a use-package key word),
-;;use `elpaca-wait' to block until that package has been installed/configured.
-;;For example:
-;;(use-package general :ensure t :demand t)
-;;(elpaca-wait)
-
-;; Expands to: (elpaca evil (use-package evil :demand t))
-
-;;; GENERIC MODES
-;; Use esup for Emacs profiling.
-(use-package esup :ensure t :demand t)
-;; Add a nice selection of colorschemes.
-(use-package doom-themes :ensure t :demand t)
-;; Add a nice modeline.
-(use-package telephone-line :ensure t :demand t)
-;; Add nice selection capabilities.
-(use-package vertico :ensure t :demand t)
-;; Make searching significantly nicer.
-(use-package ctrlf :ensure t :demand t)
-;; Use a custom terminal emulator
-(use-package vterm :ensure t :demand t)
-;; Use the custom formatter that I wrote.
-(use-package efmt
-  :demand t
-  :ensure (:host github :repo "joshuaharry/efmt" :main "efmt.el"))
-;; Use the shell to set up our exec path.
-(use-package exec-path-from-shell :ensure t :demand t)
-;; Use Magit for an awesome git experience.
-;; For mysterious reasons, we have to load `transient' before we load magit in
-;; order to get the package to actually work.
-(use-package transient :ensure (:fetcher github :repo "magit/transient"))
-(use-package magit :ensure t)
-;; Use Flycheck for linting.
-(use-package flycheck :ensure t :demand t)
-;; Use Yasnippet for snippets.
-(use-package yasnippet :ensure t :demand t)
-;; Use direnv for direnv support.
-(use-package direnv :ensure t :demand t)
-
-;;; LANGUAGE MODES
-;; Markdown support.
-(use-package markdown-mode :ensure t :demand t)
-;; Clojure support.
-(use-package cider :ensure t :demand t)
-;; OCaml support.
-(use-package tuareg :ensure t :demand t)
-(use-package dune :ensure t :demand t)
-(use-package merlin :ensure t :demand t)
-;; Haskell support
-(use-package haskell-mode :ensure t :demand t)
-;; Use Web mode for HTML/CSS/JavaScript
-(use-package web-mode :ensure t :demand t)
-
-(elpaca-wait)
-
-;; Formatting
+;; LISP formatting
 (defun jlib/indent-lisp ()
   "Indent the buffer in a LISP-y way for me."
   (interactive)
   (indent-region (point-min) (point-max))
   (message "Buffer indented successfully."))
 
-(setq *efmt-format-alist*
-      `(("el" ,#'jlib/indent-lisp)
-	("hs" ("ormolu" "-i" "<TARGET>"))
-	("clj" ("cljfmt" "fix" "<TARGET>"))
-	("edn" ("cljfmt" "fix" "<TARGET>"))
-	("ml" ("ocamlformat" "--enable-outside-detected-project" "<TARGET>"))
-	("html" ("prettier" "-w" "<TARGET>"))
-	("css" ("prettier" "-w" "<TARGET>"))
-	("js" ("prettier" "-w" "<TARGET>"))
-	("md" ("prettier" "-w" "<TARGET>"))
-	("go" ("gofmt" "-w" "<TARGET>"))))
+(setq
+ *efmt-format-alist*
+ `((json-mode ("prettier" "-w" "<TARGET>"))
+   (js-mode ("prettier" "-w" "<TARGET>"))
+   (c-mode ("clang-format" "-i" "<TARGET>"))
+   (c++-mode ("clang-format" "-i" "<TARGET>"))
+   (haskell-mode ("ormolu" "-i" "<TARGET>"))
+   ("el" ,#'jlib/indent-lisp)))
 
-;; Do not use any shell arguments with `exec-path-from-shell'.
-(setq exec-path-from-shell-arguments nil)
-
-;; Work around a bug where esup tries to step into the byte-compiled
-;; version of `cl-lib', and fails horribly.
-(setq esup-depth 0)
-
-;; Enable snippets everywhere.
-(yas-global-mode)
-;; Enable formatting everywhere.
 (global-set-key (kbd "C-c p") #'efmt)
-;; Enable the modeline.
-(telephone-line-mode 1)
-;; Enable nice selections.
-(vertico-mode)
-;; Enable better searching.
-(ctrlf-mode +1)
-;; Toggle a nice theme.
-(load-theme 'doom-one-light t)
-;; Load the $PATH from the shell.
-(exec-path-from-shell-initialize)
-;; Enable direnv.
-(direnv-mode)
 
-;; Terminals in Emacs
-(defvar *jlib/term-fn* #'vterm
-  "The function I use for creating a terminal.")
 
-(defun jlib/summon-terminal ()
-  "Summon a terminal."
-  (interactive)
-  (funcall *jlib/term-fn*))
+;; PACKAGES
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(package-initialize)
 
-(defun jlib/summon-terminal-right ()
-  "Summon a terminal to the right of where I am."
-  (interactive)
-  (split-window-right)
-  (other-window 1)
-  (funcall *jlib/term-fn*))
+(use-package esup :ensure t :demand t)
 
-(defun jlib/summon-terminal-left ()
-  "Summon a terminal to the left of where I am."
-  (interactive)
-  (split-window-right)
-  (funcall *jlib/term-fn*)
-  (other-window 1))
+;; General nice changes
+(use-package vertico :ensure t :demand t :init (vertico-mode))
+(use-package ctrlf :ensure t :demand t :init (ctrlf-mode))
+(use-package rg :ensure t :demand t :init (global-set-key (kbd "C-M-s") #'rg))
+(use-package corfu :ensure t :demand t :init (global-corfu-mode))
 
-(defun jlib/summon-terminal-below ()
-  "Summon a terminal below where I am."
-  (interactive)
-  (split-window-vertically)
-  (funcall *jlib/term-fn*))
+;; Haskell
+(use-package haskell-mode :ensure t :demand t)
 
-(defun jlib/summon-terminal-above ()
-  "Summon a terminal above where I am."
-  (interactive)
-  (split-window-vertically)
-  (other-window 1)
-  (funcall *jlib/term-fn*))
-
-(global-set-key (kbd "C-c t t") #'jlib/summon-terminal)
-(global-set-key (kbd "C-c t h") #'jlib/summon-terminal-left)
-(global-set-key (kbd "C-c t j") #'jlib/summon-terminal-below)
-(global-set-key (kbd "C-c t k") #'jlib/summon-terminal-above)
-(global-set-key (kbd "C-c t l") #'jlib/summon-terminal-right)
-
-;; Global Programming settings
-(defun jlib/prog-mode-hook ()
-  "My global settings for programming."
-  (display-line-numbers-mode)
-  (flycheck-mode))
-
-(add-hook 'prog-mode-hook #'jlib/prog-mode-hook)
-
-;; Ocmal programming settings
-(defun jlib/tuareg-mode-hook ()
-  "My settings for hacking OCaml code."
-  (merlin-mode))
-
-(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode)) 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode)) 
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . web-mode)) 
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-(setq web-mode-enable-current-element-highlight t)
-
-(defun jlib/web-mode-hook ()
-  "Hook for entering and editing web mode files."
-  ;; Treat ' as a string. I spent *years* trying to figure out how to make
-  ;; web-mode do this correctly, and I only found the solution after I tried
-  ;; to write a major mode of my own. You live and you learn :)
-  (modify-syntax-entry ?' "\"" web-mode-syntax-table)
-  (modify-syntax-entry ?` "\"" web-mode-syntax-table)
-  (setq
-   web-mode-auto-close-style 2
-   web-mode-markup-indent-offset 2
-   web-mode-enable-auto-quoting nil
-   web-mode-css-indent-offset 2
-   web-mode-code-indent-offset 2))
-
-(add-hook 'tuareg-mode-hook #'jlib/tuareg-mode-hook)
+(add-hook
+ 'haskell-mode-hook
+ (lambda ()
+   (eglot-ensure)))
 
 ;; Now that init has finished, we have to reset GC and the `file-name-handler-alist'
 ;; to something sane.
-(setq
- file-name-handler-alist '(("\\`/[^/]*\\'" . tramp-completion-file-name-handler)
-			   ("\\`/[^/|:][^/|]*:" . tramp-file-name-handler)
-			   ("\\`/:" . file-name-non-special))
- gc-cons-threshold (* 1024 1024 100))
+(setq gc-cons-threshold (* 1024 1024 100))
+
+;;; Commentary:
+;; This is my Emacs config.  There are many others like it, but this one is mine.
+
+(provide 'init)
+;;; init.el ends here
